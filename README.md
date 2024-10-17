@@ -17,7 +17,7 @@ To maintain clarity and organization in our repository, please follow these bran
 Example: `feature/user-authentication`  
 This helps clearly indicate branches that are being used to develop new features for the application.
 
-**Folder Structure**
+**Folder Structure**(CLICK EDIT FILE TO OPEN THIS IN THE FORMAT EASIER TO VIEW, MAKE SURE TO NOT COMMIT ANY CHANGES)
 weather-map-app/
 ├── .git/                   # Git version control files
 ├── docs/                   # Documentation (if needed)
