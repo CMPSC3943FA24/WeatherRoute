@@ -8,5 +8,13 @@ WeatherRoute is a web-based application that predicts weather conditions along a
 
 **Problem Solved**: WeatherRoute helps users navigate safely by providing accurate, location-based forecasts and rerouting options to avoid severe weather, improving travel safety and efficiency.
 
-**Technical Architecture**:  
+**Technical Architecture**:
 The application is a web app using JavaScript for the frontend, Python for backend logic, and integrates with weather and routing APIs. A cloud-based database manages user preferences, historical data, and route recommendations.
+
+**Branch Naming Conventions**
+To maintain clarity and organization in our repository, please follow these branch naming conventions:
+ **Feature Branches**: Use `feature/<feature-name>` for new features. 
+Example: `feature/user-authentication`  
+This helps clearly indicate branches that are being used to develop new features for the application.
+
+
