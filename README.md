@@ -17,4 +17,19 @@ To maintain clarity and organization in our repository, please follow these bran
 Example: `feature/user-authentication`  
 This helps clearly indicate branches that are being used to develop new features for the application.
 
-
+**Folder Structure**
+weather-map-app/
+├── .git/                   # Git version control files
+├── docs/                   # Documentation (if needed)
+├── src/                    # Source code
+│   ├── components/         # UI components for the frontend
+│   ├── pages/              # Page components for different views
+│   ├── services/           # API calls and backend services
+│   ├── utils/              # Utility functions and helpers
+│   ├── styles/             # CSS/SCSS files for styling
+│   ├── main.py             # Main backend application file
+├── public/                 # Public assets (like images and icons)
+├── tests/                  # Test cases for both frontend and backend
+├── .gitignore              # Files and folders to ignore in Git
+├── README.md               # Project overview and instructions
+└── requirements.txt        # Python dependencies for the backend
