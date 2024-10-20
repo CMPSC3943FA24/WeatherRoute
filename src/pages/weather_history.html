@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel History</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom right, #e0f7fa, #80deea); /* Gradient background */
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #0073e6;
+            margin-bottom: 40px;
+        }
+
+        #search {
+            margin-bottom: 20px;
+            padding: 10px;
+            width: 100%;
+            border: 1px solid #0073e6;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .location-card {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            transition: transform 0.2s, box-shadow 0.2s; /* Hover effects */
+        }
+
+        .location-card:hover {
+            transform: scale(1.03); /* Scale effect on hover */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1); /* Enhanced shadow */
+        }
+
+        .location-info {
+            max-width: 70%; /* Give some space for the icon */
+        }
+
+        .location-info h3 {
+            margin-bottom: 15px;
+            color: #0056b3;
+            font-size: 1.5rem;
+        }
+
+        .location-info p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .map-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #0073e6;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .map-link:hover {
+            text-decoration: underline;
+        }
+
+        .weather-info {
+            margin: 0 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            text-align: center;
+        }
+
+        .weather-icon {
+            width: 50px;
+            height: auto;
+            margin-top: 10px;
+        }
+
+        .travel-icon {
+            font-size: 3rem;
+            color: #0073e6;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.5rem;
+            color: #0073e6;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 10px 15px;
+            border: none;
+            background-color: #0073e6;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .pagination button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .location-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .location-info {
+                max-width: 100%;
+                margin-bottom: 20px;
+            }
+
+            .travel-icon {
+                font-size: 2.5rem;
+            }
+
+            .weather-icon {
+                width: 40px; /* Adjust icon size for smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>My Travel History</h1>
+        <input type="text" id="search" placeholder="Search trips..." />
+        <div id="loading-indicator" class="loading">Loading travel data...</div>
+        <div id="travel-history" style="display: none;">
+            <!-- Travel locations will be inserted here dynamically -->
+        </div>
+        <div class="pagination" style="display: none;">
+            <button id="prevPage">Previous</button>
+            <button id="nextPage">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const travelData = [
+            { from: "Ada", to: "Irving", state: "OK" },
+            { from: "Norman", to: "Euless", state: "TX" },
+            { from: "Oak Point", to: "San Antonio", state: "TX" },
+            { from: "Davis", to: "Little Elm", state: "TX" }
+            // Add more travel data if needed
+        ];
+
+        const apiKey = '23d244556b2492d0e22311c584f9d917'; // OpenWeatherMap API key
+        const travelHistoryContainer = document.getElementById('travel-history');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const searchInput = document.getElementById('search');
+        const prevPageButton = document.getElementById('prevPage');
+        const nextPageButton = document.getElementById('nextPage');
+
+        let currentPage = 0;
+        const itemsPerPage = 2;
+
+        function calculateMidpoint(from, to) {
+            return {
+                lat: (from.lat + to.lat) / 2,
+                lon: (from.lon + to.lon) / 2
+            };
+        }
+
+        const cityCoordinates = {
+            "Ada": { lat: 34.7744, lon: -96.6715 },
+            "Irving": { lat: 32.8140, lon: -96.9489 },
+            "Norman": { lat: 35.2226, lon: -97.4395 },
+            "Euless": { lat: 32.8397, lon: -97.0814 },
+            "Oak Point": { lat: 33.1973, lon: -96.0531 },
+            "San Antonio": { lat: 29.4241, lon: -98.4936 },
+            "Davis": { lat: 34.5004, lon: -97.1407 },
+            "Little Elm": { lat: 33.1604, lon: -96.9320 }
+        };
+
+        function createLocationCard(route) {
+            const locationCard = document.createElement('div');
+            locationCard.classList.add('location-card');
+
+            const locationInfo = document.createElement('div');
+            locationInfo.classList.add('location-info');
+            
+            const city = document.createElement('h3');
+            city.textContent = `Route: ${route.from} to ${route.to}, ${route.state}`;
+            
+            const details = document.createElement('p');
+            details.textContent = 'Recently traveled route';
+
+            const mapLink = document.createElement('a');
+            mapLink.href = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(route.from)},${encodeURIComponent(route.state)}&destination=${encodeURIComponent(route.to)},${encodeURIComponent(route.state)}`;
+            mapLink.textContent = 'View Route on Map';
+            mapLink.target = '_blank';
+            mapLink.classList.add('map-link');
+
+            locationInfo.appendChild(city);
+            locationInfo.appendChild(details);
+            locationInfo.appendChild(mapLink);
+
+            const weatherInfo = document.createElement('div');
+            weatherInfo.classList.add('weather-info');
+
+            const weatherIcon = document.createElement('img');
+            weatherIcon.classList.add('weather-icon');
+            weatherInfo.appendChild(weatherIcon); // Append weather icon
+
+            const icon = document.createElement('span');
+            icon.classList.add('travel-icon');
+
+            locationCard.appendChild(locationInfo);
+            locationCard.appendChild(weatherInfo);
+            locationCard.appendChild(icon);
+
+            travelHistoryContainer.appendChild(locationCard);
+
+            return { locationCard, weatherInfo, weatherIcon, icon };
+        }
+
+        function fetchWeather(route, weatherInfo, weatherIcon, icon) {
+            const fromCoords = cityCoordinates[route.from];
+            const toCoords = cityCoordinates[route.to];
+            const midpoint = calculateMidpoint(fromCoords, toCoords);
+
+            const midpointUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${midpoint.lat}&lon=${midpoint.lon}&appid=${apiKey}&units=imperial`;
+
+            fetch(midpointUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.cod === 200) {
+                        weatherInfo.textContent = `Weather on the road: ${data.weather[0].description}, ${data.main.temp}°F`;
+                        weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`; // Set weather icon
+                        icon.textContent = '🚗';
+                    } else {
+                        weatherInfo.textContent = `Weather data not available for the route.`;
+                        weatherIcon.src = ''; // Clear icon on error
+                    }
+                })
+                .catch(error => {
+                    weatherInfo.textContent = `Error fetching weather data for the route.`;
+                    weatherIcon.src = ''; // Clear icon on error
+                    console.error('Error fetching weather data:', error);
+                });
+        }
+
+        function initTravelHistory() {
+            loadingIndicator.style.display = 'none';
+            travelHistoryContainer.style.display = 'block';
+            travelHistoryContainer.innerHTML = ''; // Clear previous entries
+
+            const startIndex = currentPage * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const currentTravelData = travelData.slice(startIndex, endIndex);
+
+            currentTravelData.forEach(route => {
+                const { locationCard, weatherInfo, weatherIcon, icon } = createLocationCard(route);
+                fetchWeather(route, weatherInfo, weatherIcon, icon);
+            });
+
+            prevPageButton.style.display = currentPage > 0 ? 'block' : 'none';
+            nextPageButton.style.display = endIndex < travelData.length ? 'block' : 'none';
+        }
+
+        function handleSearch() {
+            const query = searchInput.value.toLowerCase();
+            const filteredData = travelData.filter(route =>
+                route.from.toLowerCase().includes(query) || route.to.toLowerCase().includes(query)
+            );
+
+            travelHistoryContainer.innerHTML = ''; // Clear previous entries
+            filteredData.forEach(route => {
+                const { locationCard, weatherInfo, weatherIcon, icon } = createLocationCard(route);
+                fetchWeather(route, weatherInfo, weatherIcon, icon);
+            });
+
+            prevPageButton.style.display = 'none'; // Hide pagination on search
+            nextPageButton.style.display = 'none'; // Hide pagination on search
+        }
+
+        searchInput.addEventListener('input', handleSearch);
+        prevPageButton.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                initTravelHistory();
+            }
+        });
+        nextPageButton.addEventListener('click', () => {
+            if ((currentPage + 1) * itemsPerPage < travelData.length) {
+                currentPage++;
+                initTravelHistory();
+            }
+        });
+
+        setTimeout(initTravelHistory, 1000);
+    </script>
+
+</body>
+</html>
