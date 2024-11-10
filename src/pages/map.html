@@ -3,107 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeatherRoute</title>
+    <title>WeatherRoute - Smart Weather-Based Route Planning</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: #f8fafc;
         }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
+
+        .gradient-text {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        h1 {
-            font-size: 2.5em;
-            color: #333;
+
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
-        p {
-            font-size: 1.2em;
-            color: #666;
-            margin-top: 10px;
+
+        .input-field {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
         }
+
+        .input-field:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transition: all 0.3s ease;
+        }
+
+        .search-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
         #map {
             width: 100%;
-            height: 1000px; /* Height of the map */
-            margin-bottom: 20px;
+            height: 600px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            background-color: #f0f0f0;
         }
-        #route-form {
+
+        .gm-style .gm-style-iw-c {
+            padding: 0 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+            max-width: 300px !important;
+        }
+
+        .gm-style .gm-style-iw-d {
+            overflow: hidden !important;
+            padding: 0 !important;
+        }
+
+        .gm-style .gm-style-iw-t::after {
+            background: linear-gradient(45deg, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, 0) 100%) !important;
+            box-shadow: none !important;
+        }
+
+        /* Close button styles */
+        .gm-style .gm-style-iw-tc {
+            display: none !important;
+        }
+
+        .gm-ui-hover-effect {
+            top: 4px !important;
+            right: 4px !important;
+            background: #f3f4f6 !important;
+            border-radius: 50% !important;
+            opacity: 1 !important;
+        }
+
+        .gm-ui-hover-effect img {
+            width: 16px !important;
+            height: 16px !important;
+            margin: 6px !important;
+            opacity: 0.6 !important;
+        }
+
+        .weather-info-container {
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        .weather-info-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .weather-info-content {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Increased space between input groups */
-            width: 80%; /* Increased width */
-            max-width: 600px; /* Increased max-width */
-            margin-bottom: 20px;
+            gap: 8px;
         }
-        .input-group {
+
+        .weather-info-row {
             display: flex;
-            flex-direction: column; /* Keep labels above inputs */
+            align-items: center;
+            gap: 8px;
+            color: #4b5563;
         }
-        label {
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* Ensures padding doesn't affect overall width */
-        }
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #city-list {
-            width: 100%;
-            max-width: 600px; /* Maximum width for city list */
+
+        .weather-info-label {
+            font-weight: 500;
+            min-width: 100px;
         }
     </style>
 </head>
-<body>
-    <h1>WeatherRoute</h1>
-    <p>Your journey, your weather—plan your route with ease!</p>
-    <form id="route-form">
-        <input type="text" id="start" placeholder="Start location" required>
-        <input type="text" id="destination" placeholder="Destination" required>
-        <button type="submit">Create Route</button>
-    </form>
-    <div id="map"></div>
-    <div id="city-list"></div>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">WeatherRoute</h1>
+            <p class="text-gray-600 text-lg md:text-xl">Plan your journey with real-time weather insights along your route</p>
+        </header>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZCUFu-JD6uAsy-F_lepi7-2gW_6FUDo4&libraries=places"></script>
+        <div class="card p-6 mb-8">
+            <form id="route-form" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-2">
+                        <label for="start" class="block text-sm font-medium text-gray-700">Starting Point</label>
+                        <input 
+                            type="text" 
+                            id="start" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Enter starting location"
+                            required
+                        >
+                    </div>
+                    <div class="space-y-2">
+                        <label for="destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                        <input 
+                            type="text" 
+                            id="destination" 
+                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
+                            placeholder="Enter destination"
+                            required
+                        >
+                    </div>
+                </div>
+                <div class="flex justify-center mt-6">
+                    <button 
+                        type="submit" 
+                        class="search-button text-white px-8 py-3 rounded-lg font-medium flex items-center space-x-2"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Plan Route</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="map"></div>
+        <div id="map-error" class="hidden text-red-600 mt-4 text-center"></div>
+        <div id="route-info" class="hidden card p-6 mt-8">
+            <h2 class="text-xl font-bold mb-4">Route Information</h2>
+            <div class="flex justify-between">
+                <div class="w-1/2 pr-4">
+                    <div class="weather-info-row">
+                        <span class="weather-info-label">Starting Point:</span>
+                        <span id="start-location"></span>
+                    </div>
+                    <div class="weather-info-row">
+                        <span class="weather-info-label">Start Time:</span>
+                        <span id="start-time"></span>
+                    </div>
+                </div>
+                <div class="w-1/2 pl-4 border-l border-gray-300">
+                    <div class="weather-info-row">
+                        <span class="weather-info-label">Destination:</span>
+                        <span id="destination-location"></span>
+                    </div>
+                    <div class="weather-info-row">
+                        <span class="weather-info-label">Destination Time:</span>
+                        <span id="destination-time"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="weather-info-row mt-4">
+                <span class="weather-info-label">Total Travel Time:</span>
+                <span id="total-travel-time"></span> 
+            </div>
+            <div class="weather-info-row mt-4">
+                <span class="weather-info-label">Total Distance:</span>
+                <span id="total-distance"></span> 
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Initialize map variables
         let map;
-        let directionsService;
-        let directionsRenderer;
+        let currentRoute;
+        let currentMarkers = [];
+        let currentInfoWindows = [];
 
-        function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: 40.7128, lng: -74.0060 },
-                zoom: 8
-            });
-
-            directionsService = new google.maps.DirectionsService();
-            directionsRenderer = new google.maps.DirectionsRenderer();
-            directionsRenderer.setMap(map);
-
-            const startInput = document.getElementById('start');
-            const destinationInput = document.getElementById('destination');
-            new google.maps.places.Autocomplete(startInput);
-            new google.maps.places.Autocomplete(destinationInput);
+        // Function to handle map initialization errors
+        function handleMapError(error) {
+            console.error('Map initialization error:', error);
+            const mapElement = document.getElementById('map');
+            const errorElement = document.getElementById('map-error');
+            mapElement.style.height = '100px';
+            errorElement.textContent = 'Error loading map. Please check your internet connection and try again.';
+            errorElement.classList.remove('hidden');
         }
 
+        // Initialize the map
+        function initMap() {
+            try {
+                const mapOptions = {
+                    center: { lat: 40.7128, lng: -74.0060 }, // New York City coordinates
+                    zoom: 8,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    mapTypeControl: true,
+                    mapTypeControlOptions: {
+                        style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
+                        position: google.maps.ControlPosition.TOP_RIGHT
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: true,
+                    streetViewControl: true,
+                    streetViewControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    fullscreenControl: true
+                };
+
+                // Create the map
+                map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+                // Initialize autocomplete for both inputs
+                const startInput = document.getElementById('start');
+                const destinationInput = document.getElementById('destination');
+                
+                new google.maps.places.Autocomplete(startInput, {
+                    types: ['geocode']
+                });
+                
+                new google.maps.places.Autocomplete(destinationInput, {
+                    types: ['geocode']
+                });
+
+                // Verify map loaded successfully
+                google.maps.event.addListenerOnce(map, 'idle', () => {
+                    console.log('Map loaded successfully');
+                });
+
+                window.addEventListener('resize', () => {
+                if (map) {
+                    google.maps.event.trigger(map, 'resize');
+                    const center = map.getCenter();
+                    map.setCenter(center);
+                    }
+                });
+
+            } catch (error) {
+                handleMapError(error);
+            }
+        }
+
+        // Handle Google Maps API load error
+        function gm_authFailure() {
+            handleMapError(new Error('Google Maps authentication failed'));
+        }
+
+        // Add form submission handler
         document.getElementById('route-form').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            const button = this.querySelector('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+            button.disabled = true;
+
             const start = document.getElementById('start').value;
             const destination = document.getElementById('destination').value;
-            
+
             fetch('http://127.0.0.1:5000/create_route', {
                 method: 'POST',
                 headers: {
@@ -111,52 +307,168 @@
                 },
                 body: JSON.stringify({ origin: start, destination: destination }),
             })
-            .then(response => response.json())
-            .then(data => {
-                displayRoute(data);
-            })
-            .catch(error => console.error('Error:', error));
+                .then(response => response.json())
+                .then(data => {
+                    displayRoute(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Unable to create route. Please try again.');
+                })
+                .finally(() => {
+                    button.innerHTML = originalContent;
+                    button.disabled = false;
+                });
         });
 
         function displayRoute(routeData) {
+            if (currentRoute) {
+                currentRoute.setMap(null);
+            }
+            currentMarkers.forEach(marker => marker.setMap(null));
+            currentMarkers = [];
+            
+            currentInfoWindows.forEach(infoWindow => infoWindow.close());
+            currentInfoWindows = [];
+
             const decodedPath = google.maps.geometry.encoding.decodePath(routeData.polyline);
             
-            const route = new google.maps.Polyline({
+            currentRoute = new google.maps.Polyline({
                 path: decodedPath,
                 geodesic: true,
-                strokeColor: '#FF0000',
-                strokeOpacity: 1.0,
-                strokeWeight: 2
+                strokeColor: '#2563eb',
+                strokeOpacity: 0.8,
+                strokeWeight: 4
             });
 
-            route.setMap(map);
+            currentRoute.setMap(map);
 
             const bounds = new google.maps.LatLngBounds();
             decodedPath.forEach(point => bounds.extend(point));
             map.fitBounds(bounds);
 
-            let cityListHTML = '<h2>Cities along the route:</h2>';
+            document.getElementById('start-location').textContent = document.getElementById('start').value;
+    
+            const startTime = new Date();
+            document.getElementById('start-time').textContent = startTime.toLocaleString();
+
+            document.getElementById('destination-location').textContent = document.getElementById('destination').value;
+
+            const estimatedDurationInSeconds = routeData.estimatedDuration;
+            const destinationTime = new Date(startTime.getTime() + estimatedDurationInSeconds * 1000);
+            document.getElementById('destination-time').textContent = destinationTime.toLocaleString();
+
+            const totalTravelTimeString = formatDuration(estimatedDurationInSeconds);
+            document.getElementById('total-travel-time').textContent = totalTravelTimeString;
+
+            document.getElementById('total-distance').textContent = `${routeData.totalDistance.toFixed(2)} miles`;
+
+            document.getElementById('route-info').classList.remove('hidden');
+
             routeData.cities.forEach(city => {
                 const marker = new google.maps.Marker({
                     position: { lat: city.lat, lng: city.lon },
                     map: map,
-                    title: city.name
+                    title: city.name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: "#2563eb",
+                        fillOpacity: 1,
+                        strokeWeight: 2,
+                        strokeColor: "#ffffff"
+                    }
                 });
 
-                cityListHTML += `
-                    <div>
-                        <h3>${city.name}, ${city.state}</h3>
-                        <p>ETA: ${new Date(city.eta).toLocaleString()}</p>
-                        <p>Temperature: ${city.weather.temperature}°C</p>
-                        <p>Description: ${city.weather.description}</p>
+                currentMarkers.push(marker);
+                bounds.extend(marker.getPosition());
+
+                const infoWindowContent = `
+                    <div class="weather-info-container">
+                        <div class="weather-info-header">
+                            ${city.name}
+                        </div>
+                        <div class="weather-info-content">
+                            <div class="weather-info-row">
+                                <span class="weather-info-label">ETA:</span>
+                                <span>${new Date(city.eta).toLocaleString()}</span>
+                            </div>
+                            <div class="weather-info-row">
+                                <span class="weather-info-label">Temperature:</span>
+                                <span>${city.weather.temperature}°F</span>
+                            </div>
+                            <div class="weather-info-row">
+                                <span class="weather-info-label">Conditions:</span>
+                                <span>${city.weather.description}</span>
+                            </div>
+                        </div>
                     </div>
                 `;
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: infoWindowContent,
+                    maxWidth: 300,
+                    pixelOffset: new google.maps.Size(0, -10)
+                });
+
+                currentInfoWindows.push(infoWindow);
+
+                infoWindow.open(map, marker);
+
+                marker.addListener('click', () => {
+                    if (infoWindow.getMap()) {
+                        infoWindow.close();
+                    } else {
+                        infoWindow.open(map, marker);
+                    }
+                });
+
+                marker.addListener('mouseover', () => {
+                    marker.setIcon({
+                        ...marker.getIcon(),
+                        scale: 10,
+                        fillColor: "#1e40af"
+                    });
+                });
+
+                marker.addListener('mouseout', () => {
+                    marker.setIcon({
+                        ...marker.getIcon(),
+                        scale: 8,
+                        fillColor: "#2563eb"
+                    });
+                });
             });
 
-            document.getElementById('city-list').innerHTML = cityListHTML;
-        }
+            map.fitBounds(bounds, {
+                padding: {
+                    top: 50,
+                    right: 50,
+                    bottom: 50,
+                    left: 50
+                }
+            });
 
-        initMap();
+            function formatDuration(seconds) {
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                
+                let result = '';
+                
+                if (hours > 0) {
+                    result += `${hours} hour${hours > 1 ? 's' : ''}`;
+                }
+                
+                if (minutes > 0) {
+                    result += `${result ? ' ' : ''}${minutes} minute${minutes > 1 ? 's' : ''}`;
+                }
+                
+                return result || 'less than a minute';
+            }
+        }
     </script>
+    
+    <!-- Load Google Maps API -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZCUFu-JD6uAsy-F_lepi7-2gW_6FUDo4&libraries=places,geometry&callback=initMap" async defer></script>
 </body>
 </html>

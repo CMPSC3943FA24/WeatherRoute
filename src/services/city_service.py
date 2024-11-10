@@ -23,10 +23,10 @@ def get_cities_in_chunk(chunk_points: List[tuple]) -> List[Dict]:
 
     try:
         lats, lons = zip(*[(float(p[0]), float(p[1])) for p in chunk_points])
-        south = min(lats)
-        north = max(lats)
-        west = min(lons)
-        east = max(lons)
+        south = min(lats) - 0.01
+        north = max(lats) + 0.01
+        west = min(lons) - 0.01
+        east = max(lons) + 0.01
         bounds = (south, west, north, east)
         
         if not all(-90 <= x <= 90 for x in [south, north]) or \

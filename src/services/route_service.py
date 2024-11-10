@@ -1,9 +1,13 @@
 import googlemaps
 from datetime import datetime, timedelta
 from typing import List, Dict
+import logging
 from services.city_service import OverpassAPIError, get_cities_in_chunk
 from services.weather_service import get_weather_forecast
 from utils.distance_calculator import calculate_distance
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def create_route(origin: str, destination: str, api_key: str) -> Dict:
     gmaps = googlemaps.Client(key=api_key)
@@ -15,6 +19,11 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
             raise Exception("No route found")
 
         route = directions_result[0]
+
+        estimated_duration = route['legs'][0]['duration']['value']
+
+        total_distance_meters = route['legs'][0]['distance']['value']
+        total_distance_miles = total_distance_meters * 0.000621371
         
         cities = get_route_cities(origin, destination, api_key)
         
@@ -38,6 +47,8 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         return {
             'origin': origin,
             'destination': destination,
+            'estimatedDuration': estimated_duration,
+            'totalDistance': total_distance_miles,
             'cities': cities_with_weather,
             'polyline': route['overview_polyline']['points']
         }
@@ -48,6 +59,8 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         raise Exception(f"Unexpected error: {e}")
 
 def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
+    logger.info("Processing route from '%s' to '%s'", origin, destination)
+    
     gmaps = googlemaps.Client(key=api_key)
     
     try:
@@ -64,9 +77,11 @@ def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
         try:
             origin_lat = float(points[0]['lat'])
             origin_lon = float(points[0]['lng'])
+            dest_lat = float(points[-1]['lat'])
+            dest_lon = float(points[-1]['lng'])
         except (KeyError, ValueError, TypeError) as e:
-            raise ValueError(f"Invalid origin coordinates: {e}")
-            
+            raise ValueError(f"Invalid coordinates: {e}")
+        
         route_cities = []
         chunk_size = 10
         
@@ -98,12 +113,40 @@ def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
                     
                 route_cities.extend(cities_in_chunk)
                 
-            except OverpassAPIError as e:
+            except OverpassAPIError:
                 continue
         
-        unique_cities = {}
+        # Add destination city
+        dest_info = gmaps.reverse_geocode((dest_lat, dest_lon))
+        if dest_info:
+            dest_city = next((component for component in dest_info[0]['address_components'] 
+                              if 'locality' in component['types']), None)
+            dest_state = next((component for component in dest_info[0]['address_components'] 
+                               if 'administrative_area_level_1' in component['types']), None)
+            if dest_city:
+                dest_city_info = {
+                    'name': dest_city['long_name'],
+                    'state': dest_state['short_name'] if dest_state else '',
+                    'lat': dest_lat,
+                    'lon': dest_lon,
+                    'distance_from_origin': calculate_distance(origin_lat, origin_lon, dest_lat, dest_lon)
+                }
+                route_cities.append(dest_city_info)
+
+        filtered_cities = []
+        last_added_city = None
+        
         for city in route_cities:
-            city_key = f"{city['name']}, {city['state'] or city['country']}"
+            if last_added_city is None or calculate_distance(
+                last_added_city['lat'], last_added_city['lon'],
+                city['lat'], city['lon']
+            ) >= 40:  # Check if distance is at least 40 miles
+                filtered_cities.append(city)
+                last_added_city = city
+
+        unique_cities = {}
+        for city in filtered_cities:
+            city_key = f"{city['name']}, {city['state'] or ''}"
             if (city_key not in unique_cities or 
                 city['distance_from_origin'] < unique_cities[city_key]['distance_from_origin']):
                 unique_cities[city_key] = city
@@ -113,6 +156,7 @@ def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
             key=lambda x: x['distance_from_origin']
         )
         
+        logger.info("Processing complete. Found %d unique cities along the route", len(sorted_cities))
         return sorted_cities
         
     except googlemaps.exceptions.ApiError as e:
