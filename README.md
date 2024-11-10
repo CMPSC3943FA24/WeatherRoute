@@ -21,11 +21,12 @@ WeatherRoute is a web-based application that predicts weather conditions along a
 
 Shown below is what the UI looks like, with the response.
 
-![Alt text](public/frontend-example.png)
+![Alt text](public/images/frontend-example.png)
 
 ## Technical Architecture
 
 The application is a web app using JavaScript for the frontend, Python for backend logic, and integrates with weather and routing APIs. A cloud-based database manages user preferences, historical data, and route recommendations.
+
 ### Backend Structure
 ```bash
 route_cities_api/
