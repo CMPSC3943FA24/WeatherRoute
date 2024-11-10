@@ -12,10 +12,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f4f4f4;
         }
         header {
-            width: 100%;
             text-align: center;
             margin-bottom: 20px;
         }
@@ -23,78 +21,80 @@
             font-size: 2.5em;
             color: #333;
         }
+        p {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+        }
         #map {
             width: 100%;
-            height: 1000px;
+            height: 1000px; /* Height of the map */
             margin-bottom: 20px;
         }
         #route-form {
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            width: 100%;
-            max-width: 400px;
-            margin-bottom: 20px; /* Add space below the form */
+            gap: 20px; /* Increased space between input groups */
+            width: 80%; /* Increased width */
+            max-width: 600px; /* Increased max-width */
+            margin-bottom: 20px;
         }
         .input-group {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Keep labels above inputs */
         }
         label {
             margin-bottom: 5px;
             font-weight: bold;
         }
         input[type="text"] {
+            width: 100%;
             padding: 10px;
             font-size: 16px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding doesn't affect overall width */
         }
         button {
             padding: 10px 15px;
             font-size: 16px;
             cursor: pointer;
-            background-color: #4CAF50; /* Green button */
-            color: white; /* White text */
-            border: none; /* No border */
-            border-radius: 4px; /* Rounded corners */
-            transition: background-color 0.3s; /* Smooth transition */
         }
-        button:hover {
-            background-color: #45a049; /* Darker green on hover */
+        #city-list {
+            width: 100%;
+            max-width: 600px; /* Maximum width for city list */
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>WeatherRoute</h1>
-    </header>
-
+    <h1>WeatherRoute</h1>
+    <p>Your journey, your weather—plan your route with ease!</p>
     <form id="route-form">
-        <div class="input-group">
-            <label for="start">Start Location:</label>
-            <input type="text" id="start" name="start" placeholder="Enter start location" required>
-        </div>
-        <div class="input-group">
-            <label for="destination">Destination:</label>
-            <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
-        </div>
-        <button type="submit">Start Route</button>
+        <input type="text" id="start" placeholder="Start location" required>
+        <input type="text" id="destination" placeholder="Destination" required>
+        <button type="submit">Create Route</button>
     </form>
-
     <div id="map"></div>
+    <div id="city-list"></div>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZCUFu-JD6uAsy-F_lepi7-2gW_6FUDo4&libraries=places&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZCUFu-JD6uAsy-F_lepi7-2gW_6FUDo4&libraries=places"></script>
     <script>
+        let map;
+        let directionsService;
+        let directionsRenderer;
+
         function initMap() {
-            const map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 37.4220656, lng: -122.0840897},
-                zoom: 10
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 40.7128, lng: -74.0060 },
+                zoom: 8
             });
+
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            directionsRenderer.setMap(map);
 
             const startInput = document.getElementById('start');
             const destinationInput = document.getElementById('destination');
-            
             new google.maps.places.Autocomplete(startInput);
             new google.maps.places.Autocomplete(destinationInput);
         }
@@ -103,10 +103,60 @@
             e.preventDefault();
             const start = document.getElementById('start').value;
             const destination = document.getElementById('destination').value;
-            console.log('Start location:', start);
-            console.log('Destination:', destination);
-            // Here you would typically call a function to calculate and display the route
+            
+            fetch('http://127.0.0.1:5000/create_route', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ origin: start, destination: destination }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayRoute(data);
+            })
+            .catch(error => console.error('Error:', error));
         });
+
+        function displayRoute(routeData) {
+            const decodedPath = google.maps.geometry.encoding.decodePath(routeData.polyline);
+            
+            const route = new google.maps.Polyline({
+                path: decodedPath,
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2
+            });
+
+            route.setMap(map);
+
+            const bounds = new google.maps.LatLngBounds();
+            decodedPath.forEach(point => bounds.extend(point));
+            map.fitBounds(bounds);
+
+            let cityListHTML = '<h2>Cities along the route:</h2>';
+            routeData.cities.forEach(city => {
+                const marker = new google.maps.Marker({
+                    position: { lat: city.lat, lng: city.lon },
+                    map: map,
+                    title: city.name
+                });
+
+                cityListHTML += `
+                    <div>
+                        <h3>${city.name}, ${city.state}</h3>
+                        <p>ETA: ${new Date(city.eta).toLocaleString()}</p>
+                        <p>Temperature: ${city.weather.temperature}°C</p>
+                        <p>Description: ${city.weather.description}</p>
+                    </div>
+                `;
+            });
+
+            document.getElementById('city-list').innerHTML = cityListHTML;
+        }
+
+        initMap();
     </script>
 </body>
 </html>
