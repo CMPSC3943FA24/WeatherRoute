@@ -17,7 +17,12 @@ def cities_on_route():
         return jsonify({
             "origin": origin,
             "destination": destination,
-            "cities": [city['name'] for city in cities]
+            "cities": [{
+                "name": city['name'],
+                "state": city['state'] or city['country'],
+                "arrival_time": city['arrival_time'],
+                "weather": city['weather']
+            } for city in cities]
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500

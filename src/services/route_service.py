@@ -3,6 +3,8 @@ import polyline
 from typing import List, Dict
 from config.settings import Config
 from services.city_service import get_cities_in_chunk
+from datetime import datetime, timedelta
+from services.weather_service import get_weather_forecast
 from utils.distance_calculator import calculate_distance
 
 def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
@@ -27,7 +29,20 @@ def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
             if city_key not in unique_cities or city['distance_from_origin'] < unique_cities[city_key]['distance_from_origin']:
                 unique_cities[city_key] = city
 
-        return sorted(unique_cities.values(), key=lambda x: x['distance_from_origin'])
+        start_time = datetime.now()
+        cities_with_info = []
+        for city in sorted(unique_cities.values(), key=lambda x: x['distance_from_origin']):
+            # Estimate travel time (assuming average speed of 60 km/h)
+            travel_time_hours = city['distance_from_origin'] / 60
+            arrival_time = start_time + timedelta(hours=travel_time_hours)
+            
+            weather = get_weather_forecast(city['name'], city['state'] or city['country'], arrival_time)
+            if weather:
+                city['arrival_time'] = arrival_time.strftime("%Y-%m-%d %H:%M:%S")
+                city['weather'] = weather
+                cities_with_info.append(city)
+
+        return cities_with_info
 
     except googlemaps.exceptions.ApiError as e:
         raise Exception(f"Google Maps API Error: {e}")
