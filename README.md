@@ -32,7 +32,7 @@ The application is a web app using JavaScript for the frontend, Python for backe
 route_cities_api/
 ├── pages/                  # Contains Frontend Logid
 │   └── map.html
-|
+│
 ├── api/                    # Contains Flask routes
 │   ├── __init__.py
 │   └── routes.py
@@ -40,7 +40,7 @@ route_cities_api/
 ├── services/               # Contains business logic for fetching routes and cities
 │   ├── __init__.py
 │   ├── route_service.py
-|   ├── weather_service.py
+│   ├── weather_service.py
 │   └── city_service.py
 │
 ├── utils/                  # Utility functions
