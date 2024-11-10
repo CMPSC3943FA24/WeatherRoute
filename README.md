@@ -29,7 +29,7 @@ The application is a web app using JavaScript for the frontend, Python for backe
 
 ### Backend Structure
 ```bash
-route_cities_api/
+src/
 ├── pages/                  # Contains Frontend Logid
 │   └── map.html
 |
