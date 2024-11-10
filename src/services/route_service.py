@@ -1,48 +1,63 @@
+# services/route_service.py
 import googlemaps
-import polyline
+from datetime import datetime, timedelta
 from typing import List, Dict
 from config.settings import Config
-from services.city_service import get_cities_in_chunk
-from datetime import datetime, timedelta
 from services.weather_service import get_weather_forecast
-from utils.distance_calculator import calculate_distance
 
 def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
     gmaps = googlemaps.Client(key=api_key)
 
     try:
-        route = gmaps.directions(origin, destination)[0]
-        points = polyline.decode(route['overview_polyline']['points'])
+        # Get the route
+        now = datetime.now()
+        directions_result = gmaps.directions(origin, destination, 
+                                             mode="driving",
+                                             departure_time=now)
 
-        origin_lat, origin_lon = points[0]
+        if not directions_result:
+            raise Exception("No route found")
+
+        route = directions_result[0]
+        
+        # Extract total duration from the route
+        total_duration = sum(leg['duration']['value'] for leg in route['legs']) / 3600  # Convert to hours
+
         route_cities = []
-        for i in range(0, len(points), Config.CHUNK_SIZE):
-            chunk_points = points[i:i + Config.CHUNK_SIZE]
-            cities_in_chunk = get_cities_in_chunk(chunk_points)
-            for city in cities_in_chunk:
-                city['distance_from_origin'] = calculate_distance(origin_lat, origin_lon, city['lat'], city['lon'])
-            route_cities.extend(cities_in_chunk)
+        current_time = now
 
-        unique_cities = {}
-        for city in route_cities:
-            city_key = f"{city['name']}, {city['state'] or city['country']}"
-            if city_key not in unique_cities or city['distance_from_origin'] < unique_cities[city_key]['distance_from_origin']:
-                unique_cities[city_key] = city
+        for leg in route['legs']:
+            for step in leg['steps']:
+                # Calculate ETA for this step
+                step_duration = step['duration']['value'] / 3600  # Convert to hours
+                current_time += timedelta(hours=step_duration)
+                
+                # Get the end location of this step
+                end_location = step['end_location']
+                
+                # Use reverse geocoding to get the city name
+                geocode_result = gmaps.reverse_geocode((end_location['lat'], end_location['lng']))
+                
+                city = None
+                state = None
+                for component in geocode_result[0]['address_components']:
+                    if 'locality' in component['types']:
+                        city = component['long_name']
+                    if 'administrative_area_level_1' in component['types']:
+                        state = component['short_name']
+                
+                if city and state:
+                    # Check if this city is already in our list
+                    if not any(c['name'] == city for c in route_cities):
+                        weather = get_weather_forecast(city, state, current_time)
+                        route_cities.append({
+                            'name': city,
+                            'state': state,
+                            'arrival_time': current_time.strftime("%Y-%m-%d %H:%M:%S"),
+                            'weather': weather
+                        })
 
-        start_time = datetime.now()
-        cities_with_info = []
-        for city in sorted(unique_cities.values(), key=lambda x: x['distance_from_origin']):
-            # Estimate travel time (assuming average speed of 60 km/h)
-            travel_time_hours = city['distance_from_origin'] / 60
-            arrival_time = start_time + timedelta(hours=travel_time_hours)
-            
-            weather = get_weather_forecast(city['name'], city['state'] or city['country'], arrival_time)
-            if weather:
-                city['arrival_time'] = arrival_time.strftime("%Y-%m-%d %H:%M:%S")
-                city['weather'] = weather
-                cities_with_info.append(city)
-
-        return cities_with_info
+        return route_cities
 
     except googlemaps.exceptions.ApiError as e:
         raise Exception(f"Google Maps API Error: {e}")

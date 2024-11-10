@@ -1,5 +1,6 @@
+# services/weather_service.py
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 from config.settings import Config
 
 def get_weather_forecast(city: str, state: str, arrival_time: datetime) -> dict:

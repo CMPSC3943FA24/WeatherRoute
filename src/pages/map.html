@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeatherRoute</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.5em;
+            color: #333;
+        }
+        #map {
+            width: 100%;
+            height: 1000px;
+            margin-bottom: 20px;
+        }
+        #route-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 20px; /* Add space below the form */
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50; /* Green button */
+            color: white; /* White text */
+            border: none; /* No border */
+            border-radius: 4px; /* Rounded corners */
+            transition: background-color 0.3s; /* Smooth transition */
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green on hover */
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>WeatherRoute</h1>
+    </header>
+
+    <form id="route-form">
+        <div class="input-group">
+            <label for="start">Start Location:</label>
+            <input type="text" id="start" name="start" placeholder="Enter start location" required>
+        </div>
+        <div class="input-group">
+            <label for="destination">Destination:</label>
+            <input type="text" id="destination" name="destination" placeholder="Enter destination" required>
+        </div>
+        <button type="submit">Start Route</button>
+    </form>
+
+    <div id="map"></div>
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZCUFu-JD6uAsy-F_lepi7-2gW_6FUDo4&libraries=places&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: 37.4220656, lng: -122.0840897},
+                zoom: 10
+            });
+
+            const startInput = document.getElementById('start');
+            const destinationInput = document.getElementById('destination');
+            
+            new google.maps.places.Autocomplete(startInput);
+            new google.maps.places.Autocomplete(destinationInput);
+        }
+
+        document.getElementById('route-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const start = document.getElementById('start').value;
+            const destination = document.getElementById('destination').value;
+            console.log('Start location:', start);
+            console.log('Destination:', destination);
+            // Here you would typically call a function to calculate and display the route
+        });
+    </script>
+</body>
+</html>
