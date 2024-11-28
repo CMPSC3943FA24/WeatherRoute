@@ -3,211 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeatherRoute - Smart Weather-Based Route Planning</title>
+    <title>WeatherRoute - Plan Smarter, Travel Better</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-        }
-        
-        body {
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background-color: #f8fafc;
-        }
-
         .gradient-text {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-
-        .card {
-            background: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
         }
-
-        .input-field {
-            transition: all 0.3s ease;
-            border: 2px solid #e2e8f0;
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
         }
-
-        .input-field:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .search-button {
-            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-            transition: all 0.3s ease;
-        }
-
-        .search-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
-        }
-
         #map {
-            width: 100%;
-            height: 600px;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            background-color: #f0f0f0;
+            height: 500px;
+            border-radius: 16px;
         }
-
-        .gm-style .gm-style-iw-c {
-            padding: 0 !important;
-            border-radius: 12px !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-            max-width: 300px !important;
+        :root {
+            --primary-color: #003366; /* Deep blue */
+            --secondary-color: #005EB8; /* Lighter blue */
+            --accent-color: #FF4E42; /* Coral accent */
+            --bg-light: #F4F4F4;
+            --bg-dark: #1A1A1A;
+            --text-light: #FFFFFF;
+            --text-dark: #333333;
         }
-
-        .gm-style .gm-style-iw-d {
-            overflow: hidden !important;
-            padding: 0 !important;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.8;
+            margin: 0;
         }
-
-        .gm-style .gm-style-iw-t::after {
-            background: linear-gradient(45deg, rgba(255, 255, 255, 1) 50%, rgba(255, 255, 255, 0) 51%, rgba(255, 255, 255, 0) 100%) !important;
-            box-shadow: none !important;
+        .header-container {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-light);
+            padding: 40px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid var(--primary-color);
         }
-
-        /* Close button styles */
-        .gm-style .gm-style-iw-tc {
-            display: none !important;
-        }
-
-        .gm-ui-hover-effect {
-            top: 4px !important;
-            right: 4px !important;
-            background: #f3f4f6 !important;
-            border-radius: 50% !important;
-            opacity: 1 !important;
-        }
-
-        .gm-ui-hover-effect img {
-            width: 16px !important;
-            height: 16px !important;
-            margin: 6px !important;
-            opacity: 0.6 !important;
-        }
-
-        .weather-info-container {
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-        }
-
-        .weather-info-header {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 8px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .weather-info-content {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .weather-info-row {
+        .header-container .header-content {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #4b5563;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
         }
-
-        .weather-info-label {
+        .header-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-light);
+            margin: 0;
+        }
+        .header-subtitle {
+            font-size: 1.5rem;
             font-weight: 500;
-            min-width: 100px;
+            color: var(--text-light);
+            margin-top: 10px;
+            margin-bottom: 10px;
         }
-    </style>
+        .footer-info {
+            margin-top: 10px;
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+        .footer-info .font-bold {
+            font-weight: 700;
+        }
+        .footer-university {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-right: 20px;
+        }
+        .logo-title-container {
+            display: flex;
+            align-items: center;
+        }
+        .text-container {
+            text-align: right;
+        }
+        .gradient-border {
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            width: 100%;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+    </style>    
 </head>
-<body class="min-h-screen p-4 md:p-8">
-    <div class="max-w-7xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 gradient-text">WeatherRoute</h1>
-            <p class="text-gray-600 text-lg md:text-xl">Plan your journey with real-time weather insights along your route</p>
-        </header>
+<body>
+    <!-- Header -->
+    <header class="header-container">
+        <div class="header-content">
+            <div class="logo-title-container">
+                <img src="../../public/images/east-central-university-ecu-logo.png" alt="East Central University Logo" class="logo">
+                <h1 class="header-title">WeatherRoute</h1>
+            </div>
+            <div class="text-container">
+                <p class="header-subtitle">Plan Smarter, Travel Better</p>
+                <div class="footer-info">
+                    <p>Created by <span class="font-bold">Team 4</span></p>
+                    <p class="footer-university">East Central University</p>
+                </div>
+            </div>
+        </div>
+    </header>
 
-        <div class="card p-6 mb-8">
-            <form id="route-form" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-2">
-                        <label for="start" class="block text-sm font-medium text-gray-700">Starting Point</label>
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Introduction Section -->
+        <section class="text-center mb-12">
+            <h2 class="text-3xl font-semibold mb-4 text-primary-color">Why Choose WeatherRoute?</h2>
+            <p class="text-lg text-gray-700">
+                WeatherRoute predicts weather conditions along your journey and makes real-time adjustments.
+                Get insights on weather forecasts, estimated travel time, and distance for a safe and optimized trip.
+            </p>
+        </section>
+
+        <!-- Journey Planner -->
+        <section class="glass p-8 mb-12 shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6">Plan Your Journey</h2>
+            <form id="route-form" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="start" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-map-marker-alt mr-2">
+                            </i>Starting Point</label>
                         <input 
-                            type="text" 
                             id="start" 
-                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
-                            placeholder="Enter starting location"
-                            required
-                        >
-                    </div>
-                    <div class="space-y-2">
-                        <label for="destination" class="block text-sm font-medium text-gray-700">Destination</label>
-                        <input 
                             type="text" 
+                            placeholder="Enter your starting location" 
+                            required>
+                    </div>
+                    <div>
+                        <label for="destination" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-flag-checkered mr-2"></i>Destination
+                        </label>
+                        <input 
                             id="destination" 
-                            class="input-field w-full px-4 py-3 rounded-lg focus:outline-none" 
-                            placeholder="Enter destination"
-                            required
-                        >
+                            type="text" 
+                            placeholder="Enter your destination" 
+                            required>
                     </div>
                 </div>
-                <div class="flex justify-center mt-6">
-                    <button 
-                        type="submit" 
-                        class="search-button text-white px-8 py-3 rounded-lg font-medium flex items-center space-x-2"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                        <span>Plan Route</span>
+                <div class="text-center">
+                    <button type="submit" class="btn-primary w-full md:w-auto px-8 py-3 text-white font-semibold rounded-lg hover:bg-blue-800">
+                        Plan My Journey
                     </button>
                 </div>
             </form>
-        </div>
+        </section>
 
-        <div id="map"></div>
-        <div id="map-error" class="hidden text-red-600 mt-4 text-center"></div>
-        <div id="route-info" class="hidden card p-6 mt-8">
-            <h2 class="text-xl font-bold mb-4">Route Information</h2>
-            <div class="flex justify-between">
-                <div class="w-1/2 pr-4">
-                    <div class="weather-info-row">
-                        <span class="weather-info-label">Starting Point:</span>
-                        <span id="start-location"></span>
-                    </div>
-                    <div class="weather-info-row">
-                        <span class="weather-info-label">Start Time:</span>
-                        <span id="start-time"></span>
-                    </div>
-                </div>
-                <div class="w-1/2 pl-4 border-l border-gray-300">
-                    <div class="weather-info-row">
-                        <span class="weather-info-label">Destination:</span>
-                        <span id="destination-location"></span>
-                    </div>
-                    <div class="weather-info-row">
-                        <span class="weather-info-label">Destination Time:</span>
-                        <span id="destination-time"></span>
-                    </div>
-                </div>
-            </div>
-            <div class="weather-info-row mt-4">
-                <span class="weather-info-label">Total Travel Time:</span>
-                <span id="total-travel-time"></span> 
-            </div>
-            <div class="weather-info-row mt-4">
-                <span class="weather-info-label">Total Distance:</span>
-                <span id="total-distance"></span> 
-            </div>
+        <!-- Map Overview -->
+        <section>
+            <h2 class="text-2xl font-semibold mb-4">Map Overview</h2>
+            <div id="map" class="shadow-md"></div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-primary-color text-light py-4 mt-12">
+        <div class="container mx-auto px-4 text-center text-sm">
+          <p>© 2024 WeatherRoute | A project by Team 4, East Central University</p>
         </div>
-    </div>
+      </footer>
 
     <script>
         // Initialize map variables
@@ -300,7 +280,7 @@
             const start = document.getElementById('start').value;
             const destination = document.getElementById('destination').value;
 
-            fetch('https://weatherroute.azurewebsites.net/create_route', {
+            fetch('http://127.0.0.1:5000/create_route', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
