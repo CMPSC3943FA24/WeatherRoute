@@ -3,121 +3,187 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WeatherRoute - Plan Smarter, Travel Better</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <title>WeatherRoute</title>
+    
+    <!-- SEO and Metadata Improvements -->
+    <meta name="description" content="WeatherRoute: Advanced travel planning with real-time weather insights and route optimization">
+    <meta name="keywords" content="weather routing, travel planning, route optimization, weather forecast">
+    <meta name="author" content="Team 4, East Central University">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="../../public/images/favicon.svg">
+    
+    <!-- Preload Critical Assets -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    
+    <!-- Fonts and Stylesheets -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
-        .gradient-text {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 16px;
-        }
-        #map {
-            height: 500px;
-            border-radius: 16px;
-        }
         :root {
-            --primary-color: #003366; /* Deep blue */
-            --secondary-color: #005EB8; /* Lighter blue */
-            --accent-color: #FF4E42; /* Coral accent */
-            --bg-light: #F4F4F4;
-            --bg-dark: #1A1A1A;
-            --text-light: #FFFFFF;
-            --text-dark: #333333;
+            --color-primary: #003366;
+            --color-secondary: #0b8cdd; 
+            --color-accent: #57C5B6;
+            --color-background: #F8FBFB;
+            --color-text-dark: #1C2331;
+            --color-text-light: #FFFFFF;
+            --color-border: #E0E7ED;
         }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            line-height: 1.8;
-            margin: 0;
+            background-color: var(--color-background);
+            color: var(--color-text-dark);
+            line-height: 1.6;
+            scroll-behavior: smooth;
         }
+
         .header-container {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: var(--text-light);
-            padding: 40px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            border-bottom: 3px solid var(--primary-color);
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-light);
+            padding: 2.5rem 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        .header-container .header-content {
+
+        .header-content {
+            position: relative;
+            z-index: 2;
             display: flex;
             align-items: center;
             justify-content: space-between;
             max-width: 1200px;
             margin: 0 auto;
         }
-        .header-title {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--text-light);
-            margin: 0;
-        }
-        .header-subtitle {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: var(--text-light);
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .footer-info {
-            margin-top: 10px;
-            font-size: 1rem;
-            color: var(--text-light);
-        }
-        .footer-info .font-bold {
-            font-weight: 700;
-        }
-        .footer-university {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.8);
-        }
+
         .logo {
             width: 100px;
             height: auto;
-            margin-right: 20px;
+            margin-right: 1.25rem;
         }
+
         .logo-title-container {
             display: flex;
             align-items: center;
         }
-        .text-container {
-            text-align: right;
+
+        .header-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--color-text-light);
+            letter-spacing: -1px;
         }
-        .gradient-border {
-            height: 4px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            width: 100%;
+
+        .header-subtitle {
+            font-size: 1.125rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.85);
+            margin-top: 0.5rem;
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .glass:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
         input[type="text"] {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--secondary-color);
-            border-radius: 4px;
-            transition: border-color 0.3s ease;
+            padding: 0.875rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background-color: rgba(255,255,255,0.7);
+            transition: all 0.3s ease;
+            font-size: 1rem;
         }
+
         input[type="text"]:focus {
             outline: none;
-            border-color: var(--accent-color);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(87, 197, 182, 0.2);
         }
-    </style>    
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-light);
+            border: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #map {
+            height: 500px;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo-title-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .header-title {
+                font-size: 2rem;
+                margin-top: 1rem;
+            }
+        }
+
+        footer {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            color: var(--color-text-light);
+            padding: 1.5rem 1rem;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+    </style> 
 </head>
 <body>
     <!-- Header -->
     <header class="header-container">
         <div class="header-content">
             <div class="logo-title-container">
-                <img src="../../public/images/east-central-university-ecu-logo.png" alt="East Central University Logo" class="logo">
+                <img src="images/favicon.svg" alt="East Central University Logo" class="logo">
                 <h1 class="header-title">WeatherRoute</h1>
             </div>
             <div class="text-container">
@@ -177,17 +243,55 @@
 
     </div>
 
-        <!-- Map Overview -->
-        <section>
-            <h2 class="text-2xl font-semibold mb-4">Map Overview</h2>
-            <div id="map" class="shadow-md"></div>
-        </section>
+    <!-- Map Overview -->
+    <section>
+        <div id="map" class="mb-8 shadow-lg"></div>
+        <div id="map-error" class="hidden text-red-600 mt-4 text-center"></div>
+        <div id="route-info" class="hidden glass p-8 mt-8 shadow-lg">
+            <h2 class="text-2xl font-semibold mb-6">Route Information</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="pr-4">
+                    <div class="mb-4">
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Starting Point:</span>
+                        <span id="start-location" class="text-lg font-medium"></span>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Start Time:</span>
+                        <span id="start-time" class="text-lg font-medium"></span>
+                    </div>
+                </div>
+                <div class="pl-4 border-l border-gray-300">
+                    <div class="mb-4">
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Destination:</span>
+                        <span id="destination-location" class="text-lg font-medium"></span>
+                    </div>
+                    <div>
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Destination Time:</span>
+                        <span id="destination-time" class="text-lg font-medium"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-300 mt-6 pt-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="pr-4">
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Total Travel Time:</span>
+                        <span id="total-travel-time" class="text-lg font-medium"></span>
+                    </div>
+                    <div class="pl-4 border-l border-gray-300">
+                        <span class="block text-sm font-medium text-gray-700 mb-1">Total Distance:</span>
+                        <span id="total-distance" class="text-lg font-medium"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     </main>
 
     <!-- Footer -->
     <footer class="bg-primary-color text-light py-4 mt-12">
-        <div class="container mx-auto px-4 text-center text-sm">
-          <p>© 2024 WeatherRoute | A project by Team 4, East Central University</p>
+        <div class="container mx-auto px-4 footer-content">
+          <p>© 2024 WeatherRoute | A project by Team 4</p>
+          <img src="images/east-central-university-ecu-logo.png" alt="East Central University Logo" class="logo">
         </div>
       </footer>
 
