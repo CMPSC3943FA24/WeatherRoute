@@ -7,7 +7,7 @@ from config.settings import Config
 logging.basicConfig(level=Config.LOG_LEVEL, format=Config.LOG_FORMAT)
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": "*"}})
 app.register_blueprint(route_bp)
 
 if __name__ == "__main__":
