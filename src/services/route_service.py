@@ -2,6 +2,7 @@ import logging
 from typing import Dict, List
 from datetime import datetime, timedelta
 import googlemaps
+import pytz
 from services.city_service import OverpassAPIError, get_cities_in_chunk
 from services.weather_service import get_weather_forecast
 from utils.distance_calculator import calculate_distance
@@ -27,11 +28,12 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         cities = get_route_cities(origin, destination, api_key)
         
         cities_with_weather = []
-        departure_time = datetime.now()
+        departure_time = datetime.now(pytz.timezone('US/Central'))
         for city in cities:
             try:
                 travel_time = timedelta(hours=city['distance_from_origin'] / 100)
                 eta = departure_time + travel_time
+                eta_cst = eta.astimezone(pytz.timezone('US/Central'))
                 
                 weather = get_weather_forecast(city['name'], city['state'], eta)
                 
@@ -41,7 +43,7 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
                         'state': city['state'],
                         'lat': city['lat'],
                         'lon': city['lon'],
-                        'eta': eta.isoformat(),
+                        'eta': eta_cst.isoformat(),
                         'weather': weather
                     })
                 else:
