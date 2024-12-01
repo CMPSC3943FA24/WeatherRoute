@@ -175,6 +175,8 @@
             </form>
         </section>
 
+    </div>
+
         <!-- Map Overview -->
         <section>
             <h2 class="text-2xl font-semibold mb-4">Map Overview</h2>
@@ -280,7 +282,7 @@
             const start = document.getElementById('start').value;
             const destination = document.getElementById('destination').value;
 
-            fetch('http://127.0.0.1:5000/create_route', {
+            fetch('https://grishmaadhikari.pythonanywhere.com/create_route', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

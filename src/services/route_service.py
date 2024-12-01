@@ -1,7 +1,7 @@
-import googlemaps
-from datetime import datetime, timedelta
-from typing import List, Dict
 import logging
+from typing import Dict, List
+from datetime import datetime, timedelta
+import googlemaps
 from services.city_service import OverpassAPIError, get_cities_in_chunk
 from services.weather_service import get_weather_forecast
 from utils.distance_calculator import calculate_distance
@@ -21,7 +21,6 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         route = directions_result[0]
 
         estimated_duration = route['legs'][0]['duration']['value']
-
         total_distance_meters = route['legs'][0]['distance']['value']
         total_distance_miles = total_distance_meters * 0.000621371
         
@@ -30,19 +29,26 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         cities_with_weather = []
         departure_time = datetime.now()
         for city in cities:
-            travel_time = timedelta(hours=city['distance_from_origin'] / 100)
-            eta = departure_time + travel_time
-            
-            weather = get_weather_forecast(city['name'], city['state'], eta)
-            
-            cities_with_weather.append({
-                'name': city['name'],
-                'state': city['state'],
-                'lat': city['lat'],
-                'lon': city['lon'],
-                'eta': eta.isoformat(),
-                'weather': weather
-            })
+            try:
+                travel_time = timedelta(hours=city['distance_from_origin'] / 100)
+                eta = departure_time + travel_time
+                
+                weather = get_weather_forecast(city['name'], city['state'], eta)
+                
+                if weather is not None:
+                    cities_with_weather.append({
+                        'name': city['name'],
+                        'state': city['state'],
+                        'lat': city['lat'],
+                        'lon': city['lon'],
+                        'eta': eta.isoformat(),
+                        'weather': weather
+                    })
+                else:
+                    logger.warning(f"Weather data not available for {city['name']}, {city['state']}. Skipping this city.")
+            except Exception as e:
+                logger.error(f"Error processing city {city['name']}, {city['state']}: {str(e)}")
+                continue  # Skip this city and continue with the next one
 
         return {
             'origin': origin,
@@ -54,8 +60,10 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
         }
 
     except googlemaps.exceptions.ApiError as e:
+        logger.error(f"Google Maps API Error: {e}")
         raise Exception(f"Google Maps API Error: {e}")
     except Exception as e:
+        logger.error(f"Unexpected error in create_route: {e}")
         raise Exception(f"Unexpected error: {e}")
 
 def get_route_cities(origin: str, destination: str, api_key: str) -> List[Dict]:
