@@ -1,6 +1,7 @@
 # WeatherRoute
 
 ![Team 4](https://img.shields.io/badge/Team-4-red)
+
   
 WeatherRoute is a web-based application that predicts weather conditions along a travel route and offers real-time adjustments. Users input starting and ending points, and the application provides weather forecasts for each segment of their journey, along with the total estimated travel time and total distance.
 
@@ -16,6 +17,14 @@ WeatherRoute is a web-based application that predicts weather conditions along a
 **Primary Audience**: Travelers and commuters who need to plan trips based on dynamic weather conditions.
 
 **Problem Solved**: WeatherRoute helps users navigate safely by providing accurate, location-based forecasts and rerouting options to avoid severe weather, improving travel safety and efficiency.
+
+## Hosted At
+
+### Frontend
+- `Render` https://weatherroute.onrender.com
+
+### Backend
+- `PythonAnywhere` https://grishmaadhikari.pythonanywhere.com
 
 ## Web Application
 
