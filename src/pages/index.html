@@ -470,21 +470,19 @@
                 bounds.extend(marker.getPosition());
 
                 const infoWindowContent = `
-                    <div class="weather-info-container">
-                        <div class="weather-info-header">
-                            ${city.name}
-                        </div>
-                        <div class="weather-info-content">
-                            <div class="weather-info-row">
-                                <span class="weather-info-label">ETA:</span>
+                    <div class="glass weather-info-container p-4 mb-4">
+                        <h3 class="text-xl font-semibold mb-2">${city.name}</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="font-medium">ETA:</span>
                                 <span>${new Date(city.eta).toLocaleString()}</span>
                             </div>
-                            <div class="weather-info-row">
-                                <span class="weather-info-label">Temperature:</span>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Temperature:</span>
                                 <span>${city.weather.temperature}°F</span>
                             </div>
-                            <div class="weather-info-row">
-                                <span class="weather-info-label">Conditions:</span>
+                            <div class="flex justify-between">
+                                <span class="font-medium">Conditions:</span>
                                 <span>${city.weather.description}</span>
                             </div>
                         </div>
