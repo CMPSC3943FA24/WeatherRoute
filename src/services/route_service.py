@@ -2,6 +2,7 @@ import logging
 from typing import Dict, List
 from datetime import datetime, timedelta
 import googlemaps
+import pytz
 from services.city_service import OverpassAPIError, get_cities_in_chunk
 from services.weather_service import get_weather_forecast
 from utils.distance_calculator import calculate_distance
@@ -13,6 +14,8 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
     gmaps = googlemaps.Client(key=api_key)
 
     try:
+        cst_tz = pytz.timezone('America/Chicago')
+
         directions_result = gmaps.directions(origin, destination, mode="driving", departure_time=datetime.now())
         
         if not directions_result:
@@ -41,7 +44,7 @@ def create_route(origin: str, destination: str, api_key: str) -> Dict:
                         'state': city['state'],
                         'lat': city['lat'],
                         'lon': city['lon'],
-                        'eta': eta.isoformat(),
+                        'eta': eta.astimezone(cst_tz).isoformat(),
                         'weather': weather
                     })
                 else:
